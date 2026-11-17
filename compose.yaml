@@ -1,0 +1,39 @@
+services:
+  gateway:
+    build: ./nginx
+    container_name: nginx-gateway
+    ports:
+      - "8084:80"
+      - "8443:443"
+    volumes:
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - frontend
+      - backend1
+      - backend2
+    networks:
+      - app-net
+    restart: unless-stopped
+  frontend:
+    build: ./frontend
+    container_name: react-frontend
+    networks:
+      - app-net
+    restart: unless-stopped
+  backend1:
+    build: ./backend/nginx-proxy-lab
+    image: devops-nginx-go:lab
+    hostname: go-api-1
+    networks:
+      - app-net
+    restart: unless-stopped
+
+  backend2:
+    image: devops-nginx-go:lab
+    hostname: go-api-2
+    networks:
+      - app-net
+    restart: unless-stopped
+networks:
+  app-net:
+    driver: bridge
